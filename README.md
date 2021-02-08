@@ -1,2 +1,10 @@
 # Computational_Musicology
 My portfolio
+
+This is a personal one.
+
+My music style preference is quite uncommon, for I listen to harder styles music. This specific kind of EDM  is by most people described as 'loud-', 'predominant music' or 'just noize'. One could say that due to it's rather intense nature it's not the most popular genre. Although there are a number of large festivals dedicated with this music style, f.e. Defqon.1, Dominator and Thunderdome. It is not broadly known what subgenre is playing unless people are familiar with it. Usually it is referred to under to 'Hardstyle' or 'Hardcore' but the terms are used haphazerdly. Like heavy metal, this style of music offers a few subgenres that are distinguishable based on the tempo, melody and energy of the song. Different subgenres are hardstyle, frenchcore, jump. Although spotify doesn't distinguish between the styles yet (harder styles are found under EDM) and admittedly sometimes the line between the subgenres is a bit arbitrary. But by only hearing a song it's possible to recognize it's genre and artist. One could argue there is an objective basis to be defined to devided the harder styles tracks into subgenres. This course would be a great moment to find that out.
+
+The good news is that most artist in the harder styles publish their works on spotify. There's more than enough tracks on spotify, even the least known subgenres of the harder styles. The matter is to select the songs in accord with their subgenres. To do this objectively, not on basis of my own interpretation or preference, is crucial to do a fair analysis. The way to do this might be from the 'type' variable of spotify. If that is unsatisfying, I would determine what subgenre the artist(s) would divide the track in. This information is often published with the track itself and it found rather easily (which is also an assumption really). Some variables that would be interesting to look at are 'energy', 'tempo' and 'valence'. Which are some factors that can help establish a profile for some of the subgenres.
+
+I personally think that this would be a fun project to work on this course.
