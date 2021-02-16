@@ -16,18 +16,32 @@ library(dplyr)
 Now to load the playlists
 ```{r}
 hard = get_playlist_audio_features('','0YySIftnwqHJRgS6SobAZ7')
+hardcore = get_playlist_audio_features('','3XxVrGIV2qFfWeG54dDRv3')
 top50 = get_playlist_audio_features('', '37i9dQZEVXbKCF6dqVpDkS')
+hardjan = get_playlist_audio_features('','74BvFUxnwQHAJXmmiACV0d')
 ```
 
 Let's compare the playlists on loudness, energy and tempo
 ```{r}
 combi <- bind_rows(
-  hard %>% mutate(category = 'hard'), top50 %>% mutate(category = 'top50')
+  hard %>% mutate(category = 'hard'), 
+  top50 %>% mutate(category = 'top50'),
+  hardcore %>% mutate(category = 'hardcore'),
+  hardjan %>% mutate(category = 'hardjan')
 )
 
 ggplot(combi, aes(category, tempo)) + geom_boxplot()
 ggplot(combi, aes(category, loudness)) + geom_boxplot()
 ggplot(combi, aes(category, energy)) + geom_boxplot()
+ggplot(combi, aes(tempo, color = category)) + 
+  geom_histogram(aes(y = ..count../sum(..count..))) + 
+  facet_wrap(~category)
 ```
-In the figures above tempo, loudness and energy are compared. On the left hardstyle music and on the right top 50 music. As seen with the energy and loudness plots, the hardstyle playlist seems to score higher with less variance, which is to be expected. The tempo also seems to be higher in accord with expectations. Although there are a few outliers in the top 50 dataset which seems to have a higher bpm then the hardstyle songs. I am curious what songs these are. Could be theres some hardcore songs that might be hidden in there. But I will need to investigate that further.
+
+In the figures above tempo, loudness and energy are compared. On the left hardstyle music and on the right top 50
+music. As seen with the energy and loudness plots, the hardstyle playlist seems to score higher with less variance,
+which is to be expected. The tempo also seems to be higher in accord with expectations. Although there are a few
+outliers in the top 50 dataset which seems to have a higher bpm then the hardstyle songs. I am curious what songs
+these are. Could be theres some hardcore songs that might be hidden in there. But I will need to investigate that
+further.
 
