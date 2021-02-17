@@ -84,7 +84,8 @@ ggplot(
   ggtitle('Figure 2: Energy as function of loudness')
 
 ```
-And how the different harder styles score in comparison to eachother.
+
+Energy seems to positively correlate with loudness
 
 ```{r}
 
