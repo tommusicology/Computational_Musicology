@@ -1,9 +1,11 @@
 ---
-title: "index.Rmd"
-output: html_document
+title: "Hardcore vs Hardstyle: battle of subgenres"
+output: 
+  flexdashboard::flex_dashboard:
+    storyboard: true
 ---
-### Is there a difference between harder styles music?
-In this project I'm going to study the harder styles music in order to justify it's (many) subgenres. 
+### Introduction - Is there a difference between harder styles music?
+In this project I'm going to study the harder styles music in order to justify it's diverse subgenres. 
 
 To start the project. There needs to be some grounded evidence that Spotify API is able to distinguish between harder styles and general pop music. So the first steps I took was look at the spotify variables that were unusual or interesting to look at.
 
@@ -12,8 +14,11 @@ library(spotifyr)
 library(tidyverse)
 library(ggplot2)
 library(dplyr)
+library(plotly)
 ```
 
+
+### Data
 Now to load the playlists
 ```{r}
 # Loading the playlists
@@ -27,87 +32,133 @@ apres_ski = get_playlist_audio_features('', '0TCZJuWGr8NVrfy1IZpwvk')
 
 # Control with 'normal' music
 top50 = get_playlist_audio_features('', '79PP1evdXDE0F7mfYRY2wZ') 
-
+q_top1000 = get_playlist_audio_features('','2pnt79m93NytfAj2lByLlQ')
 ```
 
-Combine the factors into one dataset
 ```{r}
-combi <- bind_rows(
+harder_stylez <- bind_rows(
   hardstyle %>% mutate(category = 'Hardstyle'), 
   hardcore %>% mutate(category = 'Hardcore'),
   frenchcore %>% mutate(category = 'Frenchcore'),
   rawstyle %>% mutate(category = 'Rawstyle'),
   terrorcore %>% mutate(category = 'Terrorcore'),
   happy_hardcore %>% mutate(category = 'Happy hardcore'),
-  apres_ski %>% mutate(category = 'Apres Ski'),
-  top50 %>% mutate(category = 'Top 50 (control)')
-)
-
+  apres_ski %>% mutate(category = 'Apres Ski'))
 ```
 
-## Harder styles, energy
+### How much energy is in harder styles music in comparison to other genres?
 The harder styles music is to some people quite overwhelming. A 'wall of sound' is how this music is often described. So it would be interesting to see the energy associated with harder styles music.
+
 ```{r}
-ggplot(
+# Combine both datasets harder styles and top 1000.
+x <- harder_stylez %>% mutate(category = 'Harder styles')
+y <- q_top1000 %>% mutate(category = 'Top 1000')
+combi <- bind_rows(x, y)
+
+combi_energy <- ggplot(
   # Compare harder style genres in terms of 
   combi, aes(x = energy, fill = category)
   ) +
   # Boxplot of each genre and it's energy rating
-  geom_boxplot (aes(energy, category)) +
+  geom_violin (aes(category, energy)) +
   
   # Set axis labels
-  labs(x = 'Energy (0.0 - 1.0)', y = 'Genre') +
+  labs(x = 'Genre', y = 'Energy') +
   
   # Set title
-  ggtitle('Figure 1:Harder styles music energy rating according to Spotify API')
+  ggtitle('Figure 1.1: Energy rating according to Spotify API')
 
-  # TODO: Set theme
+combi_tempo <- ggplot(
+  combi, aes(x = tempo, fill = category)) +
+    geom_violin(aes(category, tempo)) +
+    labs(x = 'Genre', y = 'Tempo') +
+    ggtitle('Figure 1.2: tempo rating according to Spotify API')
+
+
+combi_valence <- ggplot(
+  combi) +
+    geom_violin(aes(category, valence, fill = category)) +
+    labs(x = 'Genre', y = 'Valence') +
+    ggtitle('Figure 1.3: valence rating according to Spotify API')
+
+combi_loudness <- ggplot(combi) +
+  geom_violin(aes(category, loudness, fill = category))+
+    labs(x = 'Genre', y = 'Loudness') +
+    ggtitle('Figure 1.4: loudness rating according to Spotify API')
+
+
+ggplotly(combi_energy)
+ggplotly(combi_tempo)
+ggplotly(combi_valence)
+ggplotly(combi_loudness)
 
 ```
-Figure 1 shows that harder styles music does live up to its reputation in this case having a high energy rating associated with fast, loud and entropic music. Rougly speaking there are three camps of intensity. 
-- High energy: Hardstyle, Happy Hardcore and Apres ski.
-- Very high energy: Terrorcore, Rawstyle, Harcore
-- Extreme energy: Frenchcore
+Figure 1 shows that harder styles music does live up to its reputation in this case having a high energy rating associated with fast, loud and entropic music.
 
-## Comparing subgenres on loudness and energy
+### Is harder styles music that different?
 Energy is dependent on how fast, loud and entropic a track is. So the next interesting thing to discover is how the relationship between loudness and energy is and how the subgenres score in comparison to eachother.
+
 ```{r}
-ggplot(
+energy_vs_loudness <- ggplot(
   # Compare BPM vs energy level
-  combi, aes(x = loudness, y = energy, color = category)
+  harder_stylez, aes(x = loudness, y = energy, color = category, shape = category)
 ) +
   
   # Jittery scatterplot
-  geom_jitter(alpha = 0.5) +
+  geom_jitter(alpha = 0.7) +
   
   # title
   ggtitle('Figure 2: Energy as function of loudness')
 
-```
+ggplotly(energy_vs_loudness)
 
-Energy seems to positively correlate with loudness
+```
+Figure 2 shows energy seems to positively correlate with loudness. Already some slight differentiation between genres is visible. Doubleclick on a subgenre to see it's 'territory' of loudness and energy.
 
 ```{r}
-
-ggplot(
-  combi %>%
+loudness <- ggplot(
+  harder_stylez %>%
     group_by(category), 
   aes(x = loudness, fill = category)
 ) +
   
   # Plot comparing loudness
-  geom_boxplot(bins = 30) +
+  geom_density(alpha = 0.8) +
   
   # Title
-  ggtitle('Figure 3: Loudness in harder styles')
+  ggtitle('Figure 3: Loudness in harder styles') 
+  
+ggplotly(loudness)
 ```
 Figure 3: happy hardcore is one of the more 'soft' harder styles. T
-Fun fact is that this genre is from the late 80s and early 90s. In line with the trend of music becoming louder. For all the other harder styles genres are from later (late 90s and 00s)
+Fun fact is that this genre is from the late 80s and early 90s whilst most the other harder styles are from from late 90s and 100s. This is in line with the trend of music in general becoming louder. 
 
-I'm not sure what I want with this figure yet. I guess it's something that could classify harder styles, but I feel like there could be a better figure.
+But to classify the harder styles on basis of loudness is not always waterproof. For example hardcore, rawstyle and frenchcore are three subgenres that sound very different musically (I might add sound samples in later portfolios to show what I mean, I feel like that is a necessity to get a feel for the differences). That definitely isn't represented in this figure.
+
+```{r}
+valence <- ggplot(
+  harder_stylez, aes(x = valence, fill = category))+
+  geom_density(alpha = 0.8) +
+  ggtitle('Figure 4: Valence in harder styles music')
+
+ggplotly(valence)
+```
+Figure 4 shows the valence score which is a measurement of the happiness asssociated with the track. Simply said score means more happy. Apres ski music and happy harcore music have in comparison a higher happiness score in their songs (which should not come as a suprise to be fair). But happy hardcore is distributed over the entire spectrum (that though should come as a suprise), this is visible by double clicking 'happy hardcore' on the legend.
+
+### Concluding remarks, harder styles subgenres are roughtly divided.
+Some characteristics of harder styles music can be visually shown using the spotify API. There are some differences and similarities versus mainstream music. Energy and loudness ratings of harder styles were on average higher than top 1000 music. But tempo in BMP was on average pretty simular, which suprised me to be honest.
+
+Between subgenres some characteristics could also be defined. For example loudness of average differs between subgenres aswell. Happy hardcore is less loud than terror, hardstyle is less loud than Frenchcore. Also apres ski and happy hardcore is on average more happy than the other genres.
+
+These characteristics could be rough guidelines to shape a profile of each subgenre. Still some extra work can be done to define them better (and make a table at the end so that you get some overview). 
+
+It might also be interesting to delve deeper into specific tracks using the time-tracker. Thus far I completely ignored the structure of the tracks itself. Harder styles music has a pretty generic EDM structure (assuming you might be familiar with it or recognize it) with a buildup towards the drop. But there are some interesting characteristics in those aswell, for example a drop following a drop (I can imagine this is hard to imagine but once I get sound samples you get the idea). 
+
+So there are still some interesting aspects to uncover.
 
 TODO:
 - Continue developing the profiles of each harder style
-- Focus on individual numbers of different genres to try and define them.
-- Look at the artists.
+- Might focus more on individual numbers of different genres to try and define them. (Fourier analysis?)
+- Might look at the artists.
 - Improve the figures (definitely)
+- Add table with all genres and characteristics
