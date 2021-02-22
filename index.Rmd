@@ -17,8 +17,6 @@ library(dplyr)
 library(plotly)
 ```
 
-
-### Data
 Now to load the playlists
 ```{r}
 # Loading the playlists
@@ -115,6 +113,7 @@ ggplotly(energy_vs_loudness)
 ```
 Figure 2 shows energy seems to positively correlate with loudness. Already some slight differentiation between genres is visible. Doubleclick on a subgenre to see it's 'territory' of loudness and energy.
 
+### Loudness in harder styles
 ```{r}
 loudness <- ggplot(
   harder_stylez %>%
@@ -135,6 +134,7 @@ Fun fact is that this genre is from the late 80s and early 90s whilst most the o
 
 But to classify the harder styles on basis of loudness is not always waterproof. For example hardcore, rawstyle and frenchcore are three subgenres that sound very different musically (I might add sound samples in later portfolios to show what I mean, I feel like that is a necessity to get a feel for the differences). That definitely isn't represented in this figure.
 
+### Valence in harder styles
 ```{r}
 valence <- ggplot(
   harder_stylez, aes(x = valence, fill = category))+
