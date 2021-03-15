@@ -3,6 +3,8 @@ title: "Harder Styles Music - Computational Musicology Portfolio"
 output: 
   flexdashboard::flex_dashboard:
     orientation: columns
+    theme: flatly
+    vertical_layout: fill
 
 ---
 ```{r, include = FALSE}
@@ -12,12 +14,12 @@ library(compmus)
 library(ggplot2)
 library(dplyr)
 library(plotly)
+library(flexdashboard)
 ```
 
 <style>
 .navbar {
   background-color:crimson;
-  border-color:orange;
 }
 .navbar-brand {
 color:black!important;
@@ -31,7 +33,7 @@ color:black!important;
 .black {
   background-color:black;
 }
-.yellow {
+.yellow { 
   background-color:yellow;
 }
 .silver {
@@ -152,7 +154,7 @@ harder_stylez <- bind_rows(
   uptempo %>% mutate(category = 'Uptempo'),
   rawstyle %>% mutate(category = 'Rawstyle'),
   industrial %>% mutate(category = 'Industrial Hardcore'),
-  happy_hardcore %>% mutate(category = 'Happy hardcore'))
+  happy_hardcore %>% mutate(category = 'Happy Hardcore'))
 
 # Combine both datasets harder styles and top 1000.
 x <- harder_stylez %>% mutate(category = 'Harder styles')
@@ -175,12 +177,15 @@ ggplot(
   facet_wrap(~category)+
   theme_minimal()+
   theme(
-    plot.background = element_rect(fill = '#888888')
+    plot.background = element_rect(color = 'red', fill = 'grey90'),
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    legend.position = 'none'
   )+
   labs(
     title = 'Harder styles genres and key',
-    subtitle = 'What keys occurd in harder styles music?',
-    caption = 'No genre really neighs toward one key, it is dependent on the song to deliver the emotional feeling of the track with it. Which is dependent on other factors'
+    subtitle = 'Blue and red color determines the minor and major of the tone respectively',
+    caption = 'Source: Spotify API'
   )
 ```
 
@@ -188,13 +193,16 @@ Column
 -----
 
 ### Computational Musicology Portfolio
-**Welcome to my portfolio for Computational Musicology.**
 
-This specific kind of EDM is by most people described as 'loud-', 'predominant music' or 'just noize'. One could say that due to it's rather intense nature it's not the most popular genre. Although there are a number of large festivals dedicated with this music style, among them Defqon.1, Dominator and Thunderdome. 
+<h1>Welcome to my portfolio for Computational Musicology.</h1>
 
-Usually harder styles music is referred to 'hardstyle', 'hardcore' or 'gabber' but the terms are used haphazerdly, to the annoyance of many true fans in the community. This style of music offers a few subgenres that are distinguishable based on the tempo, melody and energy of the song. But these styles evolve and influence eachother over time. Thus it could be difficult to determine how a style truly is defined. But for at this moment, different subgenres for example are hardstyle, frenchcore, jump. Spotify doesn't distinguish between the styles yet (all harder styles are found under EDM) and admittedly sometimes the line between the subgenres is a bit arbitrary. But by only hearing a song it's possible to recognize it's style and even artist. Also, Spotify is able to do that too! As the algorithm is able to recommend harder styles songs. One could argue there is an objective basis to be defined to order the harder styles tracks into subgenres. This course would be a great moment to find that out.
+Imagine a standing a front a contruction site, where they 'hammer' and 'bonk' on a ryhtm. Take a moment to hear how that would sound.
 
-Some variables that would be interesting to look at are *energy*, *tempo* and *valence*. In my portfolio I am going to try and establish a **profile** for some of the most recognized harder styles in the community. In two ways this will be done. I'll be comparing harder styles music with other Western music styles and with other subgenres. Using the hardstyle wiki I'll look at characteristics of these genres and see whether these hold up. There genres that are considered in this portfolio are; happy hardcore, euphoric hardstyle, raw hardstyle, mainstream hardcore, industrial hardcore and where things get really crazy; uptempo. The page colors correspond to the stages of defqon 1 where these respective genres are played (more or less).
+You have just experienced how most people experience [hardcore house](https://nl.wikipedia.org/wiki/Hardcore_house) music, often reffered to as **harder styles music**. This specific kind of EDM is by most people described as _loud-_, _predominant music_ or _just noize_. One could say that due to the intensity of the sound it's not the most popular genre. Although the're a number of large festivals in The Netherlands dedicated to unique music, some you may know; Thunderdome, Defqon.1, Dominator and Free Festival, Qlimax. 
+
+Usually harder styles music is referred to _hardstyle_, _hardcore_ or _gabber_ but the terms are used haphazerdly. To the annoyance of many true fans of the genre, because the style of music offers many styles with different characteristics. For example by tempo, melody and energy of the tracks. But the styles evolve and influence eachother over time. Thus it could be difficult to determine how a style truly is defined. Spotify doesn't distinguish between the styles yet (all harder styles tracks are found under EDM) and admittedly sometimes the line between the subgenres is a bit arbitrary. But by only hearing a song it's possible to recognize it's style and even artist. Also, Spotify is able to do that too! As the algorithm is able to recommend harder styles songs. One could argue there is an objective basis to be defined to order the harder styles tracks into subgenres. This course would be a great moment to find that out.
+
+In my portfolio I am going to try and establish a **profile** for some of the most recognized harder styles in the community. In two ways this will be done. I'll be comparing harder styles music with other Western music styles and with other subgenres. Using the hardstyle wiki I'll look at characteristics of these genres and see whether these hold up. There genres that are considered in this portfolio are; [happy hardcore](https://www.youtube.com/watch?v=KWJEM5Vcxmk), [euphoric hardstyle](https://www.youtube.com/watch?v=pVMSEaXUpcU), [raw hardstyle](https://www.youtube.com/watch?v=coQbQL_1gsg), [mainstream hardcore](https://www.youtube.com/watch?v=9Rkx_OpJBks), [industrial hardcore](https://www.youtube.com/watch?v=VDgRRTz1piw) and where things get really crazy; [uptempo hardcore](https://www.youtube.com/watch?v=PS8qiTp3ybU). The page colors correspond to the Defqon.1 festival stages color of  where these respective genres are played (more or less).
 
 The second page is harder styles compared to other music. On the third page are subgenres considered apart from one another and this is summarized on the last page.
 
