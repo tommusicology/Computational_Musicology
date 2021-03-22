@@ -15,6 +15,9 @@ library(ggplot2)
 library(dplyr)
 library(plotly)
 library(flexdashboard)
+library(tidymodels)
+library(ggdendro)
+library(heatmaply)
 ```
 
 <style>
@@ -162,12 +165,27 @@ y <- q_top1000 %>% mutate(category = 'Top 1000')
 combi <- bind_rows(x, y)
 ```
 
-Column
+Column {data-width=400}
 -----
-### Introduction
+### Computational Musicology Portfolio
 
-![Defqon 1 Festival 2019, endshow](https://www.pyrofoor.com/uploads/resized/small/16-9/website_showcases_2019_defqon.1_0036_20190630230105_jeancarlo_2853.jpg)
+<h1>Welcome to my portfolio for Computational Musicology.</h1>
 
+Imagine a standing a front a contruction site, where they 'hammer' and 'bonk' on a ryhtm. Take a moment to hear how that would sound.
+
+You have just experienced how most people experience [hardcore house](https://nl.wikipedia.org/wiki/Hardcore_house) music, often reffered to as **harder styles music**. This specific kind of EDM is by most people described as _loud-_, _predominant music_ or _just noize_. One could say that due to the intensity of the sound it's not the most popular genre. Although the're a number of large festivals in The Netherlands dedicated to unique music, some you may know; Thunderdome, Defqon.1, Dominator, Free Festival and Qlimax. 
+
+Usually harder styles music is referred to _hardstyle_, _hardcore_ or _gabber_ but the terms are used haphazerdly. To the annoyance of many true fans of the genre, because the style of music offers many styles with different characteristics. For example by tempo, melody and energy of the tracks. But the styles evolve and influence eachother over time. Thus it could be difficult to determine how a style truly is defined. Spotify doesn't distinguish between the styles yet (all harder styles tracks are found under EDM) and admittedly sometimes the line between the subgenres is a bit arbitrary. But by only hearing a song it's possible to recognize it's style and even artist. Also, Spotify is able to do that too! As the algorithm is able to recommend harder styles songs. One could argue there is an objective basis to be defined to order the harder styles tracks into subgenres. This course would be a great moment to find that out.
+
+In my portfolio I am going to try and establish a **profile** for some of the most recognized harder styles in the community. In two ways this will be done. I'll be comparing harder styles music with other Western music styles and with other subgenres. Using the hardstyle wiki I'll look at characteristics of these genres and see whether these hold up. There genres that are considered in this portfolio are; [happy hardcore](https://www.youtube.com/watch?v=KWJEM5Vcxmk), [euphoric hardstyle](https://www.youtube.com/watch?v=pVMSEaXUpcU), [raw hardstyle](https://www.youtube.com/watch?v=coQbQL_1gsg), [mainstream hardcore](https://www.youtube.com/watch?v=9Rkx_OpJBks), [industrial hardcore](https://www.youtube.com/watch?v=VDgRRTz1piw) and where things get really crazy; [uptempo hardcore](https://www.youtube.com/watch?v=PS8qiTp3ybU). 
+
+The different genres are discussed in the harder styles catalogue. Also some honorable mentions are added. The page colors correspond to the [color of the respective Defqon.1 festival stages](https://www.reddit.com/r/hardstyle/comments/7mddmz/color_meaning_of_the_stages_in_defqon1/) where these respective genres are played (except pink which I just found a suitable color for happy hardcore).
+
+The second page is harder styles compared to other music. On the third page are subgenres considered apart from one another and this is summarized on the last page.
+
+
+Column {data-width=600}
+-----
 ### Chordogram
 ```{r}
 ggplot(
@@ -189,47 +207,199 @@ ggplot(
   )
 ```
 
-Column
------
-
-### Computational Musicology Portfolio
-
-<h1>Welcome to my portfolio for Computational Musicology.</h1>
-
-Imagine a standing a front a contruction site, where they 'hammer' and 'bonk' on a ryhtm. Take a moment to hear how that would sound.
-
-You have just experienced how most people experience [hardcore house](https://nl.wikipedia.org/wiki/Hardcore_house) music, often reffered to as **harder styles music**. This specific kind of EDM is by most people described as _loud-_, _predominant music_ or _just noize_. One could say that due to the intensity of the sound it's not the most popular genre. Although the're a number of large festivals in The Netherlands dedicated to unique music, some you may know; Thunderdome, Defqon.1, Dominator and Free Festival, Qlimax. 
-
-Usually harder styles music is referred to _hardstyle_, _hardcore_ or _gabber_ but the terms are used haphazerdly. To the annoyance of many true fans of the genre, because the style of music offers many styles with different characteristics. For example by tempo, melody and energy of the tracks. But the styles evolve and influence eachother over time. Thus it could be difficult to determine how a style truly is defined. Spotify doesn't distinguish between the styles yet (all harder styles tracks are found under EDM) and admittedly sometimes the line between the subgenres is a bit arbitrary. But by only hearing a song it's possible to recognize it's style and even artist. Also, Spotify is able to do that too! As the algorithm is able to recommend harder styles songs. One could argue there is an objective basis to be defined to order the harder styles tracks into subgenres. This course would be a great moment to find that out.
-
-In my portfolio I am going to try and establish a **profile** for some of the most recognized harder styles in the community. In two ways this will be done. I'll be comparing harder styles music with other Western music styles and with other subgenres. Using the hardstyle wiki I'll look at characteristics of these genres and see whether these hold up. There genres that are considered in this portfolio are; [happy hardcore](https://www.youtube.com/watch?v=KWJEM5Vcxmk), [euphoric hardstyle](https://www.youtube.com/watch?v=pVMSEaXUpcU), [raw hardstyle](https://www.youtube.com/watch?v=coQbQL_1gsg), [mainstream hardcore](https://www.youtube.com/watch?v=9Rkx_OpJBks), [industrial hardcore](https://www.youtube.com/watch?v=VDgRRTz1piw) and where things get really crazy; [uptempo hardcore](https://www.youtube.com/watch?v=PS8qiTp3ybU). The page colors correspond to the Defqon.1 festival stages color of  where these respective genres are played (more or less).
-
-The second page is harder styles compared to other music. On the third page are subgenres considered apart from one another and this is summarized on the last page.
-
-### Plot 2
-
 Harder styles vs other music {.storyboard}
 =================================
 
+### **NEW** Dendrogram and clustering
+```{r}
+get_conf_mat <- function(fit) {
+  outcome <- .get_tune_outcome_names(fit)
+  fit %>% 
+    collect_predictions() %>% 
+    conf_mat(truth = outcome, estimate = .pred_class)
+}  
+
+get_pr <- function(fit) {
+  fit %>% 
+    conf_mat_resampled() %>% 
+    group_by(Prediction) %>% mutate(precision = Freq / sum(Freq)) %>% 
+    group_by(Truth) %>% mutate(recall = Freq / sum(Freq)) %>% 
+    ungroup() %>% filter(Prediction == Truth) %>% 
+    select(class = Prediction, precision, recall)
+}  
+```
+
+```{r}
+cluster <-
+  bind_rows( 
+    euphoric %>% mutate(playlist = 'Euphoric Hardstyle')%>% slice_head(n=20),
+    hardcore %>% mutate(playlist = 'Mainstream Hardcore') %>% slice_head(n=20),
+    uptempo %>% mutate(playlist = 'Uptempo') %>% slice_head(n=20),
+    rawstyle %>% mutate(playlist = 'Raw hardstyle') %>% slice_head(n=20),
+    industrial %>% mutate(playist = 'Industrial Hardcore') %>% slice_head(n=20),
+    happy_hardcore %>% mutate(playlist = 'Happy Hardcore') %>% slice_head(n=20)
+  ) 
+```
+
+```{r}
+indie_features <-
+  cluster %>%  # For your portfolio, change this to the name of your corpus.
+  add_audio_analysis() %>% 
+  mutate(
+    playlist = factor(playlist),
+    segments = map2(segments, key, compmus_c_transpose),
+    pitches =
+      map(
+        segments,
+        compmus_summarise, pitches,
+        method = "mean", norm = "manhattan"
+      ),
+    timbre =
+      map(
+        segments,
+        compmus_summarise, timbre,
+        method = "mean",
+      )
+  ) %>%
+  mutate(pitches = map(pitches, compmus_normalise, "clr")) %>%
+  mutate_at(vars(pitches, timbre), map, bind_rows) %>%
+  unnest(cols = c(pitches, timbre))
+```
+
+```{r}
+indie_recipe <-
+  recipe(
+    playlist ~
+      danceability +
+      energy +
+      loudness +
+      speechiness +
+      acousticness +
+      instrumentalness +
+      liveness +
+      valence +
+      tempo +
+      duration +
+      C + `C#|Db` + D + `D#|Eb` +
+      E + `F` + `F#|Gb` + G +
+      `G#|Ab` + A + `A#|Bb` + B +
+      c01 + c02 + c03 + c04 + c05 + c06 +
+      c07 + c08 + c09 + c10 + c11 + c12,
+    data = indie_features,          # Use the same name as the previous block.
+  ) %>%
+  step_center(all_predictors()) %>%
+  step_scale(all_predictors())      # Converts to z-scores.
+  # step_range(all_predictors())    # Sets range to [0, 1].
+```
+
+```{r}
+indie_cv <- indie_features %>% vfold_cv(5)
+```
+
+```{r}
+knn_model <-
+  nearest_neighbor(neighbors = 1) %>%
+  set_mode("classification") %>% 
+  set_engine("kknn")
+indie_knn <- 
+  workflow() %>% 
+  add_recipe(indie_recipe) %>% 
+  add_model(knn_model) %>% 
+  fit_resamples(
+    indie_cv, 
+    control = control_resamples(save_pred = TRUE)
+  )
+
+indie_knn %>% get_conf_mat()
+```
+
+
 ### Loudness
+```{r}
+combi <- bind_rows(harder_stylez %>% mutate(category = 'Harder styles'), hip_hop, classic, dubstep, rock, death_metal)
+
+combi_loudness <- ggplot(combi) +
+  geom_violin(aes(category, loudness, fill = category))+
+    labs(x = 'Genre', y = 'Loudness') +
+    ggtitle('Figure 1.1: Loudness across different music Styles') +
+  theme(
+    plot.background = element_rect(fill = '#DC143C'),
+    panel.background = element_rect(fill = '#8B000B'),
+    legend.background = element_rect(fill = '#FF8C00'),
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.text.y = element_text(color = 'white'),
+    panel.grid = element_blank()
+  )
+
+combi_loudness
+```
 
 ***
 The loudness difference between harder styles music and top 1000 music is clearly visible. 
 
 ### Valance
+```{r}
+combi_valence <- ggplot(combi) +
+  geom_violin(aes(category, valence, fill = category))+
+    labs(x = 'Genre', y = 'Valence') +
+    ggtitle('Figure 1.2: Valence across different music Styles') +
+  theme(
+    plot.background = element_rect(fill = '#DC143C'),
+    panel.background = element_rect(fill = '#8B000B'),
+    legend.background = element_rect(fill = '#FF8C00'),
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.text.y = element_text(color = 'white'),
+    panel.grid = element_blank()
+  )
 
+combi_valence
+```
 
 ***
 Valence rating is determined by the 'positiveness' of a tune, a higher valence means more positive song. It appears that harder styles music in general contains less happy emotions.
 
 ### Tempo
+```{r}
+combi_tempo <- ggplot(combi) +
+  geom_violin(aes(category, tempo, fill = category))+
+    labs(x = 'Genre', y = 'Tempo') +
+    ggtitle('Tempo across different music Styles') +
+  theme(
+    plot.background = element_rect(fill = '#DC143C'),
+    panel.background = element_rect(fill = '#8B000B'),
+    legend.background = element_rect(fill = '#FF8C00'),
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.text.y = element_text(color = 'white'),
+    panel.grid = element_blank()
+  )
 
+combi_tempo
+```
 
 ***
-A great difference in tempo is not clearly seen. Harder styles music seems to be consistent around the 100 BPM and 160 BPM mark. Although harder styles music seems to in general have a slight edge above top 1000 music. More clearly indicated differences can be found between subgenres.
+A great difference in tempo is not clearly seen. Harder styles music seems follow a bipolar distribution around the 100 BPM and 150 BPM mark. Although harder styles music seems to in general have a slight edge in general tempo.
 
 ### Energy
+```{r}
+combi_energy <- ggplot(combi) +
+  geom_violin(aes(category, energy, fill = category))+
+    labs(x = 'Genre', y = 'Energy') +
+    ggtitle('Figure 1.4: Energy across different music Styles') +
+  theme(
+    plot.background = element_rect(fill = '#DC143C'),
+    panel.background = element_rect(fill = '#8B000B'),
+    legend.background = element_rect(fill = '#FF8C00'),
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.text.y = element_text(color = 'white'),
+    panel.grid = element_blank()
+  )
 
+combi_energy
+```
 
 ***
 The energy rating plot shows a clear characteristic of harder styles music. It seems that harder styles music in general contains a lot of energy, according to the unbiased spotify API, which in particular should not come as a suprise really.
