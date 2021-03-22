@@ -21,12 +21,6 @@ library(heatmaply)
 ```
 
 <style>
-.navbar {
-  background-color:crimson;
-}
-.navbar-brand {
-color:black!important;
-}
 .pink {
   background-color:pink;
 }
@@ -45,6 +39,109 @@ color:black!important;
 .blue {
   background-color:blue;
 }
+
+.navbar-inverse {
+  background-color: crimson;
+  border-color: crimson;
+}
+.navbar-inverse .navbar-brand {
+  color: #ffffff;
+}
+.navbar-inverse .navbar-brand:hover,
+.navbar-inverse .navbar-brand:focus {
+  color: #ffffff;
+  background-color: none;
+}
+.navbar-inverse .navbar-text {
+  color: #ffffff;
+}
+.navbar-inverse .navbar-nav > li > a {
+  color: #ffffff;
+}
+.navbar-inverse .navbar-nav > li > a:hover,
+.navbar-inverse .navbar-nav > li > a:focus {
+  color: #ffffff;
+  background-color: crimson;
+}
+.navbar-inverse .navbar-nav > .active > a,
+.navbar-inverse .navbar-nav > .active > a:hover,
+.navbar-inverse .navbar-nav > .active > a:focus {
+  color: #ffffff;
+  background-color: crimson;
+}
+.navbar-inverse .navbar-nav > .disabled > a,
+.navbar-inverse .navbar-nav > .disabled > a:hover,
+.navbar-inverse .navbar-nav > .disabled > a:focus {
+  color: #ffffff;
+  background-color: transparent;
+}
+.navbar-inverse .navbar-toggle {
+  border-color: transparent;
+}
+.navbar-inverse .navbar-toggle:hover,
+.navbar-inverse .navbar-toggle:focus {
+  background-color: crinson;
+}
+.navbar-inverse .navbar-toggle .icon-bar {
+  background-color: #ffffff;
+}
+.navbar-inverse .navbar-collapse,
+.navbar-inverse .navbar-form {
+  border-color: crimson;
+}
+.navbar-inverse .navbar-nav > .open > a,
+.navbar-inverse .navbar-nav > .open > a:hover,
+.navbar-inverse .navbar-nav > .open > a:focus {
+  background-color: crimson;
+  color: #ffffff;
+}
+@media (max-width: 767px) {
+  .navbar-inverse .navbar-nav .open .dropdown-menu > .dropdown-header {
+    border-color: crimson;
+  }
+  .navbar-inverse .navbar-nav .open .dropdown-menu .divider {
+    background-color: crimson;
+  }
+  .navbar-inverse .navbar-nav .open .dropdown-menu > li > a {
+    color: #ffffff;
+  }
+  .navbar-inverse .navbar-nav .open .dropdown-menu > li > a:hover,
+  .navbar-inverse .navbar-nav .open .dropdown-menu > li > a:focus {
+    color: #ffffff;
+    background-color: crimson;
+  }
+  .navbar-inverse .navbar-nav .open .dropdown-menu > .active > a,
+  .navbar-inverse .navbar-nav .open .dropdown-menu > .active > a:hover,
+  .navbar-inverse .navbar-nav .open .dropdown-menu > .active > a:focus {
+    color: #ffffff;
+    background-color: crimson;
+  }
+  .navbar-inverse .navbar-nav .open .dropdown-menu > .disabled > a,
+  .navbar-inverse .navbar-nav .open .dropdown-menu > .disabled > a:hover,
+  .navbar-inverse .navbar-nav .open .dropdown-menu > .disabled > a:focus {
+    color: #ffffff;
+    background-color: transparent;
+  }
+}
+.navbar-inverse .navbar-link {
+  color: #ffffff;
+}
+.navbar-inverse .navbar-link:hover {
+  color: #ffffff;
+}
+.navbar-inverse .btn-link {
+  color: #ffffff;
+}
+.navbar-inverse .btn-link:hover,
+.navbar-inverse .btn-link:focus {
+  color: #ffffff;
+}
+.navbar-inverse .btn-link[disabled]:hover,
+fieldset[disabled] .navbar-inverse .btn-link:hover,
+.navbar-inverse .btn-link[disabled]:focus,
+fieldset[disabled] .navbar-inverse .btn-link:focus {
+  color: #ffffff;
+
 </style>
 
 ```{r}
@@ -207,10 +304,8 @@ ggplot(
   )
 ```
 
-Harder styles vs other music {.storyboard}
+**NEW** Dendrogram and clustering {.storyboard}
 =================================
-
-### **NEW** Dendrogram and clustering
 ```{r}
 get_conf_mat <- function(fit) {
   outcome <- .get_tune_outcome_names(fit)
@@ -296,6 +391,7 @@ indie_recipe <-
 indie_cv <- indie_features %>% vfold_cv(5)
 ```
 
+### Prediction vs truth table
 ```{r}
 knn_model <-
   nearest_neighbor(neighbors = 1) %>%
@@ -312,6 +408,8 @@ indie_knn <-
 
 indie_knn %>% get_conf_mat()
 ```
+
+### Heatmap
 
 ```{r}
 indie_knn %>% get_conf_mat() %>% autoplot(type = "heatmap")
@@ -334,7 +432,7 @@ indie_tree <-
 indie_tree %>% get_pr()
 ```
 
-```{r}
+```{r, include= FALSE}
 workflow() %>% 
   add_recipe(indie_recipe) %>% 
   add_model(tree_model) %>% 
@@ -358,6 +456,26 @@ indie_forest <-
   )
 ```
 
+### Importance of features
+
+```{r}
+workflow() %>% 
+  add_recipe(indie_recipe) %>% 
+  add_model(forest_model) %>% 
+  fit(indie_features) %>% 
+  pluck("fit", "fit", "fit") %>%
+  ranger::importance() %>% 
+  enframe() %>% 
+  mutate(name = fct_reorder(name, value)) %>% 
+  ggplot(aes(name, value)) + 
+  geom_col() + 
+  coord_flip() +
+  theme_minimal() +
+  labs(x = NULL, y = "Importance")
+```
+
+### Cluster Analysis
+
 ```{r}
 indie_features %>%
   ggplot(aes(x = c01, y = c02, colour = playlist, size = energy)) +
@@ -372,14 +490,29 @@ indie_features %>%
 ```
 
 
+Harder styles vs other music {.storyboard}
+=================================
+
 ### Loudness
+```{r, include = FALSE}
+hip_hop = get_playlist_audio_features('', '4QZ4F2Yxc6RLx7ybP0Ozn4') %>%
+  mutate(category = 'Hip Hop')
+classic = get_playlist_audio_features('', '37i9dQZF1DWWEJlAGA9gs0') %>%
+  mutate(category = 'Classic')
+dubstep = get_playlist_audio_features('', '3ObJ6Qra3CkV0gNCRTtK0c') %>%
+  mutate(category = 'Dubstep')
+rock = get_playlist_audio_features('', '37i9dQZF1DWXRqgorJj26U') %>%
+  mutate(category = 'Rock')
+death_metal = get_playlist_audio_features('','3ULksLh0NM7VF6BqXcOIKL') %>%
+  mutate(category = 'Death Metal')
+```
 ```{r}
 combi <- bind_rows(harder_stylez %>% mutate(category = 'Harder styles'), hip_hop, classic, dubstep, rock, death_metal)
 
 combi_loudness <- ggplot(combi) +
   geom_violin(aes(category, loudness, fill = category))+
     labs(x = 'Genre', y = 'Loudness') +
-    ggtitle('Figure 1.1: Loudness across different music Styles') +
+    ggtitle('Figure 1.1: loudness across different music styles') +
   theme(
     plot.background = element_rect(fill = '#DC143C'),
     panel.background = element_rect(fill = '#8B000B'),
@@ -394,14 +527,14 @@ combi_loudness
 ```
 
 ***
-The loudness difference between harder styles music and top 1000 music is clearly visible. 
+Figure 1.1 shows a distribution of loudness of tracks in different music genres. Harder styles is considered one of them. The playlists that are selected consist of +100 songs per genre. In terms of loudness harder styles are comparable with dubstep. Which is not estranged from the earlier discussed aspects of harder styles music. 
 
 ### Valance
 ```{r}
 combi_valence <- ggplot(combi) +
   geom_violin(aes(category, valence, fill = category))+
     labs(x = 'Genre', y = 'Valence') +
-    ggtitle('Figure 1.2: Valence across different music Styles') +
+    ggtitle('Figure 1.2: valence across different music styles') +
   theme(
     plot.background = element_rect(fill = '#DC143C'),
     panel.background = element_rect(fill = '#8B000B'),
@@ -416,14 +549,14 @@ combi_valence
 ```
 
 ***
-Valence rating is determined by the 'positiveness' of a tune, a higher valence means more positive song. It appears that harder styles music in general contains less happy emotions.
+Figure 1.2 shows that harder styles music often has a more 'serious' tone to it. Valence rating is determined by the 'positiveness' of a tune, a higher valence means more positive song. It appears that harder styles music in general contains less happy emotions. 
 
 ### Tempo
 ```{r}
 combi_tempo <- ggplot(combi) +
   geom_violin(aes(category, tempo, fill = category))+
     labs(x = 'Genre', y = 'Tempo') +
-    ggtitle('Tempo across different music Styles') +
+    ggtitle('Figure 1.3: tempo across different music styles') +
   theme(
     plot.background = element_rect(fill = '#DC143C'),
     panel.background = element_rect(fill = '#8B000B'),
@@ -520,9 +653,9 @@ melodious
 high valence
 high acousticness
 
-'HHC is definitely that bouncy, bubbly, piano-y, breakbeat-y, hip hop sampling, uber-cheesy, massively fun, whistle blowing, semi-spastic, candy raver shit.' - Random stranger from reddit
+'HHC is definitely that bouncy, bubbly, piano-y, breakbeat-y, hip hop sampling, uber-cheesy, massively fun, whistle blowing, semi-spastic, candy raver sh*t.' 
 
-'Happy Hardcore is major chord, piano-led, sample powered 90's rave.' - Another random stranger from reddit
+'Happy Hardcore is major chord, piano-led, sample powered 90's rave.'
 
 ### Plot 3
 
@@ -542,7 +675,15 @@ Column
 
 ### Plot 2
 
-### Characteristics
+### Characteristics of Euphoric Hardstyle
+Melodious, Emotional
+
+This is considered the more approachable form of hardstyle. As opposed to raw hardstyle. This is a more melodic approach to hardstyle. The kick often moves in conjunction with the melody of the track making it very enjoyable to listen and dance to.
+
+The sound first started in the early 2000s with influences from early hardcore and trance.
+
+Some notable artists go under Headhunterz, Noisecontrollers, Wildstylez & Sub Zero Project.
+
 
 ### Plot 3
 
@@ -563,7 +704,15 @@ Column
 
 ### Plot 2
 
-### Characteristics
+### Characteristics of Raw Hardstyle
+
+Aggressive, dark melodies
+
+In the early 2010s a demand for more harder kicks existed, rawstyle or raw-hardstyle was born. A more aggressive sound, darker melodies and harder bass. 
+
+Rawstyle tracks have more drive to it, with shorter breaks. Rawstyle kicks tend to have a much harder transient with much distortion, granting it's aggressive nature. 
+
+Some notable artists are: Radical Redemption, Warface, Rebellion, Gunz for Hire.
 
 ### Plot 3
 
@@ -583,7 +732,15 @@ Column
 
 ### Plot 2
 
-### Characteristics
+### Characteristics of main hardcore
+
+Distorted kicks.
+
+Main hardcore is a style where the average artists and hardcore listerers can be found. One of the main distinguishable features from hardstyle is the higher tempo and its bass drum sound. Which essentially comes from take a normal synthesized bass drum and distorting it. This creates an agressive and loud sound as a result of the frequency spectrum spreading out. But it's not uncommon for the bass drum pattern to change pitch, therefore many tracks can still sound 'happy'. 
+
+It started in the early 2000s as slower and more mature version of gabber. 
+
+Artists worth mentioning are Angerfist, Miss K8, DJ Mad Dog
 
 ### Plot 3
 
@@ -602,7 +759,13 @@ Column
 
 ### Plot 2
 
-### Characteristics
+### Characteristics of industrial hardcore
+
+Industrial, Consistent
+
+Industrial hardcore has many features of other genres. Mostly notable techno and gabber. What makes it unique from other harder styles is less breaks and more constant 'bonking'. 
+
+Notable artists are The Outside Agency, Radium, N-Vitral.
 
 ### Plot 3
 
@@ -622,12 +785,22 @@ Column
 
 ### Plot 2
 
-### Characteristics
+### Characteristics of frenchcore
+
+Explosive, fast
+
+An umbrella term for again different genre's like frenchcore, terror and speedcore. But one thing that stands out from this style is the high tempo, energy and maddening chaos of the sound. Often very high and low pitch is found in each track and unexpected kickrolls are frequent. The explosive and fast nature make this style challenging to appreciate musically, but many tracks can actually be very melodious.
+
+This style started in the early 1990s and has been consistendly popular. Only in the latest few years the genres has been upcoming and popularised, very likely by the notable artists; Dr. Peacock, Sefa, Cyclone
 
 ### Plot 3
 
 
 Concluding remarks
 ===============================
+
+In this portfolio an attemp was done to justify/classify popular subgenres in harder styles music. I will discuss my findings in the chapter below along with supporting evidence and additional sources.
+
+
 
 Thank you for reading
