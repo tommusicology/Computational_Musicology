@@ -236,7 +236,7 @@ cluster <-
     hardcore %>% mutate(playlist = 'Mainstream Hardcore') %>% slice_head(n=20),
     uptempo %>% mutate(playlist = 'Uptempo') %>% slice_head(n=20),
     rawstyle %>% mutate(playlist = 'Raw hardstyle') %>% slice_head(n=20),
-    industrial %>% mutate(playist = 'Industrial Hardcore') %>% slice_head(n=20),
+    industrial %>% mutate(playlist = 'Industrial Hardcore') %>% slice_head(n=20),
     happy_hardcore %>% mutate(playlist = 'Happy Hardcore') %>% slice_head(n=20)
   ) 
 ```
@@ -311,6 +311,64 @@ indie_knn <-
   )
 
 indie_knn %>% get_conf_mat()
+```
+
+```{r}
+indie_knn %>% get_conf_mat() %>% autoplot(type = "heatmap")
+indie_knn %>% get_pr()
+```
+
+```{r}
+tree_model <-
+  decision_tree() %>%
+  set_mode("classification") %>% 
+  set_engine("C5.0")
+indie_tree <- 
+  workflow() %>% 
+  add_recipe(indie_recipe) %>% 
+  add_model(tree_model) %>% 
+  fit_resamples(
+    indie_cv, 
+    control = control_resamples(save_pred = TRUE)
+  )
+indie_tree %>% get_pr()
+```
+
+```{r}
+workflow() %>% 
+  add_recipe(indie_recipe) %>% 
+  add_model(tree_model) %>% 
+  fit(indie_features) %>% 
+  pluck("fit", "fit", "fit") %>%
+  summary()
+```
+
+```{r}
+forest_model <-
+  rand_forest() %>%
+  set_mode("classification") %>% 
+  set_engine("ranger", importance = "impurity")
+indie_forest <- 
+  workflow() %>% 
+  add_recipe(indie_recipe) %>% 
+  add_model(forest_model) %>% 
+  fit_resamples(
+    indie_cv, 
+    control = control_resamples(save_pred = TRUE)
+  )
+```
+
+```{r}
+indie_features %>%
+  ggplot(aes(x = c01, y = c02, colour = playlist, size = energy)) +
+  geom_point(alpha = 0.8) +
+  scale_color_viridis_d() +
+  labs(
+    x = "Timbre Component 1",
+    y = "Timbre Component 2",
+    size = "Energy",
+    colour = "Playlist"
+  )
 ```
 
 
