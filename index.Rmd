@@ -2,7 +2,6 @@
 title: "Harder Styles Music - Computational Musicology Portfolio"
 output: 
   flexdashboard::flex_dashboard:
-    orientation: columns
     theme: flatly
     vertical_layout: fill
 
@@ -21,8 +20,37 @@ library(heatmaply)
 ```
 
 <style>
+
+.main {
+  margin:-10px;
+  background-image:url(https://www.hardnews.nl/wp-content/uploads/2019/02/Defqon.1-2019-Power-Hour.jpg);
+  background-color:crimson;
+  background-size:cover
+}
+
+.endpage {
+  margin:-10px;
+  background-image:url(https://cdn.q-dance.com/l6hfsc63q612/dxAUSSwPB8qDSivbkoZsn/784e312ff76a72fae8ce73e9baa09f25/0006_20190629225030_kevin_2513-Edit.jpg?w=1440)
+}
+
+.white{
+  background-color: rgb(255, 255, 255, 0.7);
+  margin:-10px;
+  padding:20px;
+}
+
 .pink {
-  background-color:pink;
+  background: url(https://images-na.ssl-images-amazon.com/images/I/71qZml61gJL._AC_SL1200_.jpg);
+  background_size: center;
+  brackground_repeat: repeat;
+  margin-top:-10px;
+  margin-left:-10px;
+}
+.pinkcol {
+  background-color: rgb(255, 153, 255, 0.8);
+  margin: 20px;
+  padding: 10px;
+  color:white;
 }
 .violet {
   background-color:violet;
@@ -232,7 +260,7 @@ key_templates <-
   )
 ```
 
-Introducing Harder Styles Music
+Introducing Harder Styles Music {.main}
 ================================
 ```{r, include = FALSE}
 # Loading the playlists
@@ -256,16 +284,35 @@ harder_stylez <- bind_rows(
   industrial %>% mutate(category = 'Industrial Hardcore'),
   happy_hardcore %>% mutate(category = 'Happy Hardcore'))
 
-# Combine both datasets harder styles and top 1000.
-x <- harder_stylez %>% mutate(category = 'Harder styles')
-y <- q_top1000 %>% mutate(category = 'Top 1000')
-combi <- bind_rows(x, y)
+hip_hop = get_playlist_audio_features('', '4QZ4F2Yxc6RLx7ybP0Ozn4') %>%
+  mutate(category = 'Hip Hop')
+classic = get_playlist_audio_features('', '37i9dQZF1DWWEJlAGA9gs0') %>%
+  mutate(category = 'Classic')
+dubstep = get_playlist_audio_features('', '3ObJ6Qra3CkV0gNCRTtK0c') %>%
+  mutate(category = 'Dubstep')
+rock = get_playlist_audio_features('', '37i9dQZF1DWXRqgorJj26U') %>%
+  mutate(category = 'Rock')
+death_metal = get_playlist_audio_features('','3ULksLh0NM7VF6BqXcOIKL') %>%
+  mutate(category = 'Death Metal')
 ```
 
-Column {data-width=400}
+```{r}
+theme_hard <- theme(
+                    rect = element_blank(),
+                    panel.grid = element_blank(),
+                    title = element_text(color = 'white'),
+                    axis.line = element_line(color = 'black'),
+                    plot.background = element_rect(fill = '#DC143C'),
+                    panel.background = element_rect(fill = '#8B000B'),
+                    legend.background = element_rect(fill = '#FF8C00'),
+                    axis.title.x = element_blank(),
+                    axis.text.x = element_blank(),
+                    axis.text.y = element_text(color = 'white'),
+                    legend.text = element_text(color = 'white')
+                    )
+```
+Column {data-width=400 .white}
 -----
-### Computational Musicology Portfolio
-
 <h1>Welcome to my portfolio for Computational Musicology.</h1>
 
 Imagine a standing a front a contruction site, where they 'hammer' and 'bonk' on a ryhtm. Take a moment to hear how that would sound.
@@ -281,30 +328,10 @@ The different genres are discussed in the harder styles catalogue. Also some hon
 The second page is harder styles compared to other music. On the third page are subgenres considered apart from one another and this is summarized on the last page.
 
 
-Column {data-width=600}
+Column {data-width=600 .white}
 -----
-### Chordogram
-```{r}
-ggplot(
-  harder_stylez,
-  aes(x = key_name)) +
-  geom_bar(aes(fill = mode_name), position='stack') +
-  facet_wrap(~category)+
-  theme_minimal()+
-  theme(
-    plot.background = element_rect(color = 'red', fill = 'grey90'),
-    axis.title.x = element_blank(),
-    axis.title.y = element_blank(),
-    legend.position = 'none'
-  )+
-  labs(
-    title = 'Harder styles genres and key',
-    subtitle = 'Blue and red color determines the minor and major of the tone respectively',
-    caption = 'Source: Spotify API'
-  )
-```
 
-**NEW** Dendrogram and clustering {.storyboard}
+Clustering {.storyboard}
 =================================
 ```{r}
 get_conf_mat <- function(fit) {
@@ -391,8 +418,7 @@ indie_recipe <-
 indie_cv <- indie_features %>% vfold_cv(5)
 ```
 
-### Prediction vs truth table
-```{r}
+```{r, include = FALSE}
 knn_model <-
   nearest_neighbor(neighbors = 1) %>%
   set_mode("classification") %>% 
@@ -410,13 +436,12 @@ indie_knn %>% get_conf_mat()
 ```
 
 ### Heatmap
-
 ```{r}
 indie_knn %>% get_conf_mat() %>% autoplot(type = "heatmap")
 indie_knn %>% get_pr()
 ```
 
-```{r}
+```{r, include = FALSE}
 tree_model <-
   decision_tree() %>%
   set_mode("classification") %>% 
@@ -456,9 +481,7 @@ indie_forest <-
   )
 ```
 
-### Importance of features
-
-```{r}
+```{r, include = FALSE}
 workflow() %>% 
   add_recipe(indie_recipe) %>% 
   add_model(forest_model) %>% 
@@ -474,7 +497,7 @@ workflow() %>%
   labs(x = NULL, y = "Importance")
 ```
 
-### Cluster Analysis
+### Cluster Scatterplot
 
 ```{r}
 indie_features %>%
@@ -489,11 +512,93 @@ indie_features %>%
   )
 ```
 
+### Cluster Analysis
+```{r}
+halloween <-
+  filter(cluster, playlist == 'Euphoric Hardstyle')  %>%
+  add_audio_analysis() %>%
+  mutate(
+    segments = map2(segments, key, compmus_c_transpose),
+    pitches =
+      map(segments,
+          compmus_summarise, pitches,
+          method = "mean", norm = "manhattan"
+      ),
+    timbre =
+      map(
+        segments,
+        compmus_summarise, timbre,
+        method = "mean"
+      )
+  ) %>%
+  mutate(pitches = map(pitches, compmus_normalise, "clr")) %>%
+  mutate_at(vars(pitches, timbre), map, bind_rows) %>%
+  unnest(cols = c(pitches, timbre))
+halloween_juice <-
+  recipe(
+    track.name ~
+      danceability +
+      energy +
+      loudness +
+      speechiness +
+      acousticness +
+      instrumentalness +
+      liveness +
+      valence +
+      tempo +
+      duration +
+      C + `C#|Db` + D + `D#|Eb` +
+      E + `F` + `F#|Gb` + G +
+      `G#|Ab` + A + `A#|Bb` + B +
+      c01 + c02 + c03 + c04 + c05 + c06 +
+      c07 + c08 + c09 + c10 + c11 + c12,
+    data = halloween
+  ) %>%
+  step_center(all_predictors()) %>%
+  step_scale(all_predictors()) %>% 
+  # step_range(all_predictors()) %>% 
+  prep(halloween %>% mutate(track.name = str_trunc(track.name, 20))) %>%
+  juice() %>%
+  column_to_rownames("track.name")
+```
 
-Harder styles vs other music {.storyboard}
+```{r}
+halloween_dist <- dist(halloween_juice, method = "euclidean")
+
+halloween_dist %>% 
+  hclust(method = "single") %>% # Try single, average, and complete.
+  dendro_data() %>%
+  ggdendrogram()
+```
+
+```{r}
+heatmaply(
+  halloween_juice,
+  hclustfun = hclust,
+  hclust_method = "complete",  # Change for single, average, or complete linkage.
+  dist_method = "manhattan"
+)
+
+heatmaply(
+  halloween_juice,
+  hclustfun = hclust,
+  hclust_method = "complete",  # Change for single, average, or complete linkage.
+  dist_method = "euclidian"
+)
+
+heatmaply(
+  halloween_juice,
+  hclustfun = hclust,
+  hclust_method = "complete",  # Change for single, average, or complete linkage.
+  dist_method = "minkowski"
+)
+```
+
+
+Audio features {.storyboard}
 =================================
 
-### Loudness
+### How loud is harder styles music?
 ```{r, include = FALSE}
 hip_hop = get_playlist_audio_features('', '4QZ4F2Yxc6RLx7ybP0Ozn4') %>%
   mutate(category = 'Hip Hop')
@@ -505,149 +610,313 @@ rock = get_playlist_audio_features('', '37i9dQZF1DWXRqgorJj26U') %>%
   mutate(category = 'Rock')
 death_metal = get_playlist_audio_features('','3ULksLh0NM7VF6BqXcOIKL') %>%
   mutate(category = 'Death Metal')
+
+combi <- bind_rows(harder_stylez, hip_hop, classic, dubstep, rock, death_metal)
 ```
+
+
 ```{r}
-combi <- bind_rows(harder_stylez %>% mutate(category = 'Harder styles'), hip_hop, classic, dubstep, rock, death_metal)
 
 combi_loudness <- ggplot(combi) +
   geom_violin(aes(category, loudness, fill = category))+
     labs(x = 'Genre', y = 'Loudness') +
-    ggtitle('Figure 1.1: loudness across different music styles') +
-  theme(
-    plot.background = element_rect(fill = '#DC143C'),
-    panel.background = element_rect(fill = '#8B000B'),
-    legend.background = element_rect(fill = '#FF8C00'),
-    axis.title.x = element_blank(),
-    axis.text.x = element_blank(),
-    axis.text.y = element_text(color = 'white'),
-    panel.grid = element_blank()
-  )
-
-combi_loudness
+    ggtitle('Loudness - music styles') +
+  theme_hard; combi_loudness
 ```
 
 ***
-Figure 1.1 shows a distribution of loudness of tracks in different music genres. Harder styles is considered one of them. The playlists that are selected consist of +100 songs per genre. In terms of loudness harder styles are comparable with dubstep. Which is not estranged from the earlier discussed aspects of harder styles music. 
 
-### Valance
+<h1> Loudness </h1>
+The construction work metaphor in the introduction of this portfolio sort of makes sense when looking at loudness. With violin plots; the thicness indicates how many tracks are at a specific point of the y-axis. At the thickest part of the 'blob' is where most of the tracks can be found. Sometimes, in the shape of a violin. In this case, it no such shape can be found. But to look at the harder styles. 4 of the harder styles can be found above the other harder genres. Having a slight advantage over dubstep and death metal. **Euphoric hardstyle and happy hardcore falling a bit short of the rest**. Generally can be said, harder styles definitely contain a strong loudness.
+
+### It is happy of serious?
 ```{r}
 combi_valence <- ggplot(combi) +
   geom_violin(aes(category, valence, fill = category))+
     labs(x = 'Genre', y = 'Valence') +
-    ggtitle('Figure 1.2: valence across different music styles') +
-  theme(
-    plot.background = element_rect(fill = '#DC143C'),
-    panel.background = element_rect(fill = '#8B000B'),
-    legend.background = element_rect(fill = '#FF8C00'),
-    axis.title.x = element_blank(),
-    axis.text.x = element_blank(),
-    axis.text.y = element_text(color = 'white'),
-    panel.grid = element_blank()
-  )
-
-combi_valence
+    ggtitle('Valence - music styles') +
+  theme_hard; combi_valence
 ```
 
 ***
-Figure 1.2 shows that harder styles music often has a more 'serious' tone to it. Valence rating is determined by the 'positiveness' of a tune, a higher valence means more positive song. It appears that harder styles music in general contains less happy emotions. 
 
-### Tempo
+<h1> Valence </h1>
+In general **harder styles music has a serious tone to it**. Especially hardcore genres (industrial, main, uptempo) seem to be more serious. An exeption seems to be **happy hardcore with a more valent tone**, which considering the name should not be a very big surprise. Hip hop and rock however seem to contain more valience. So, it looks like the hardcore compensates for the happy.
+
+### Does it truly live up to it's fast reputation?
 ```{r}
 combi_tempo <- ggplot(combi) +
-  geom_violin(aes(category, tempo, fill = category))+
+  geom_boxplot(aes(category, tempo, fill = category))+
     labs(x = 'Genre', y = 'Tempo') +
-    ggtitle('Figure 1.3: tempo across different music styles') +
-  theme(
-    plot.background = element_rect(fill = '#DC143C'),
-    panel.background = element_rect(fill = '#8B000B'),
-    legend.background = element_rect(fill = '#FF8C00'),
-    axis.title.x = element_blank(),
-    axis.text.x = element_blank(),
-    axis.text.y = element_text(color = 'white'),
-    panel.grid = element_blank()
-  )
-
-combi_tempo
+    ggtitle('Tempo - music styles') +
+  theme_hard; combi_tempo
 ```
 
 ***
-A great difference in tempo is not clearly seen. Harder styles music seems follow a bipolar distribution around the 100 BPM and 150 BPM mark. Although harder styles music seems to in general have a slight edge in general tempo.
 
-### Energy
+<h1> Tempo </h1>
+Strangely enough, harder styles music do **not seem to have an extravagrantly high tempo**. Which kind of were one of the predesignated criteria to determine wether it's harder styles music or not. Euphoric and raw hardstyle seem to have most of the tracks around the 150BMP and 160-165BMP mark respectively. This is in line with the **tendency for hardstyle producers to remain loyal to the 150-160BMP**. Surprisingly, uptempo seems to be at 100BMP, for which I have two hypothesis. First is Spotify tempo assesment spasses out, due to too high BPM or undefinable beat kicks. Second is there are often long breaks between drops in uptempo songs. It could be that a long break compensate for high BPM.
+
+### How much energy goes in harder styles music?
 ```{r}
 combi_energy <- ggplot(combi) +
   geom_violin(aes(category, energy, fill = category))+
     labs(x = 'Genre', y = 'Energy') +
-    ggtitle('Figure 1.4: Energy across different music Styles') +
-  theme(
-    plot.background = element_rect(fill = '#DC143C'),
-    panel.background = element_rect(fill = '#8B000B'),
-    legend.background = element_rect(fill = '#FF8C00'),
-    axis.title.x = element_blank(),
-    axis.text.x = element_blank(),
-    axis.text.y = element_text(color = 'white'),
-    panel.grid = element_blank()
-  )
-
-combi_energy
+    ggtitle('Energy - music Styles') +
+  theme_hard; combi_energy
 ```
 
 ***
-The energy rating plot shows a clear characteristic of harder styles music. It seems that harder styles music in general contains a lot of energy, according to the unbiased spotify API, which in particular should not come as a suprise really.
 
+<h1> Energy </h1>
+Energy seems more variable among the harder styles. With most genres having a great portion of it. Judging by the thickness of the plots for **mainstream hardcore, rawstyle and especially industrial seem on average to contain the most energy**. Comparible to death metal. The energy for happy hardcore and euphoric hardstyle seem more variable.
+
+### What about keys?
+```{r}
+ggplot(
+  harder_stylez,
+  aes(x = key_name)) +
+  geom_bar(aes(fill = mode_name), position='stack') +
+  facet_wrap(~category)+
+  theme_minimal()+
+  theme_hard +
+  labs(
+    title = 'Harder styles genres and key',
+    subtitle = 'Blue and red color determines the minor and major of the tone respectively',
+    caption = 'Source: Spotify API'
+  )
+```
+ 
+***
+<h1> Why keys in harder styles don't work </h1>
+
+It does seem that harder styles music in general does not remain loyal to one certain key. One explanation for that could be it is to refrain from being more repetative. For example the kick of hardstyle is pretty generalized. The variation possibility is limited so to create some additinal variability. There will be played with melodies a lot. 
+
+Another point is that it might be useless to assign keys to harder styles music. Because it is digitally synthetised, audio comes from many different frequencies at once and are often distored and boosted. Despite there often being some kind of melody, a histogram of keys might not depict the information about the key we want.
+
+Harder styles structure analysis {.storyboard}
+==========
+### Comparison; Imaginary - Brennan Heart
+```{r}
+imaginary <-
+  get_tidy_audio_analysis("2kbkKplT5jKVFJFBLzUpXK") %>% # Change URI.
+  compmus_align(bars, segments) %>%                     # Change `bars`
+  select(bars) %>%                                      #   in all three
+  unnest(bars) %>%                                      #   of these lines.
+  mutate(
+    pitches = 
+      map(segments,
+        compmus_summarise, pitches,
+        method = "rms", norm = "euclidean"              # Change summary & norm.
+      )
+  ) %>%
+  mutate(
+    timbre =
+      map(segments,
+        compmus_summarise, timbre,
+        method = "rms", norm = "euclidean"              # Change summary & norm.
+      )
+  )
+
+life_is_lost <-
+  get_tidy_audio_analysis("2Tg6Lh9nlPbH8Qby1uHPeC") %>% # Change URI.
+  compmus_align(bars, segments) %>%                     # Change `bars`
+  select(bars) %>%                                      #   in all three
+  unnest(bars) %>%                                      #   of these lines.
+  mutate(
+    pitches = 
+      map(segments,
+        compmus_summarise, pitches,
+        method = "rms", norm = "euclidean"              # Change summary & norm.
+      )
+  ) %>%
+  mutate(
+    timbre =
+      map(segments,
+        compmus_summarise, timbre,
+        method = "rms", norm = "euclidean"              # Change summary & norm.
+      )
+  )
+```
+
+```{r}
+imaginary %>%
+  compmus_gather_timbre() %>%
+  ggplot(
+    aes(
+      x = start + duration / 2,
+      width = duration,
+      y = basis,
+      fill = value
+    )
+  ) +
+  geom_tile() +
+  labs(x = "Time (s)", y = NULL, fill = "Magnitude") +
+  scale_fill_viridis_c() +                              
+  theme_hard +
+  theme()
+```
+
+***
+
+The structural analysis will be done on two tracks. [maginary from Brennan Heart](https://open.spotify.com/track/2TgDK4TC5KsywTYafAE4Gd?si=nsg_V-X3Tmma2WOkdW9kMg) is truly a classic and is also a well defined euphoric hardstyle track. 
+
+and [Life is Lost from Dr. Peacock and Sefa](https://open.spotify.com/track/2Tg6Lh9nlPbH8Qby1uHPeC?si=ZF7ENl4gRdGizzxHOFZsUw) characterizes itself as a true frenchcore track.
+
+The first track is imaginary by Brennan Heart. This track has got 5 phases with repetition visible: 
+
+intro - buildup - first drop - buildup - second drop
+
+The buildup and drops are similar in structure, which is visible in the plot aswell.
+
+The intro starts with singing, and a simple beat and melody. Timbre coëfficients c02, c04 and c06 are the strongest here.
+
+Afterwards follows the buildup. The singing continues and additional melodies with increasing intensity join in. c03 and c05 join c02 with high intensity. c01 comes un in the background, which gives the listener the feel of a drop coming.
+
+The drop. Most of the energy is put in c01 and c06. It seems that these could be the core of the hardstyle 'kick'.
+
+The buildup and drop repeat with noticable differences.
+
+### Self simularity imaginary: timbre
+```{r}
+imaginary %>%
+  compmus_self_similarity(timbre, "cosine") %>% 
+  ggplot(
+    aes(
+      x = xstart + xduration / 2,
+      width = xduration,
+      y = ystart + yduration / 2,
+      height = yduration,
+      fill = d
+    )
+  ) +
+  geom_tile() +
+  coord_fixed() +
+  scale_fill_viridis_c(guide = "none") +
+  theme_hard +
+  labs(x = "", y = "")
+```
+
+***
+
+Self-similarity of the imaginary track with timbre features.
+
+### Self similarity imaginary: pitch
+```{r}
+imaginary %>%
+  compmus_self_similarity(pitches, "cosine") %>% 
+  ggplot(
+    aes(
+      x = xstart + xduration / 2,
+      width = xduration,
+      y = ystart + yduration / 2,
+      height = yduration,
+      fill = d
+    )
+  ) +
+  geom_tile() +
+  coord_fixed() +
+  scale_fill_viridis_c(guide = "none") +
+  theme_hard +
+  labs(x = "", y = "")
+```
+
+***
+
+The pitch self similarity show repitition of the drop and buildup. 
+
+### Comparison Life is Lost
+```{r}
+life_is_lost %>%
+  compmus_gather_timbre() %>%
+  ggplot(
+    aes(
+      x = start + duration / 2,
+      width = duration,
+      y = basis,
+      fill = value
+    )
+  ) +
+  geom_tile() +
+  labs(x = "Time (s)", y = NULL, fill = "Magnitude") +
+  scale_fill_viridis_c() +                              
+  theme_hard
+```
+
+***
+
+The Life Is Lost track also has phases to be defined. 
+Intro - First drop - Buildup - Drop - Pauze - Drop - Pauze - Drop - Outro
+
+The track begins with atmospheric introduction (listen)
+
+Without warning the track develops into the first drop. Just like the hardstyle track; ** the kick exists in the c01 coefficient**
+
+Afterwards in settles down into a buildup phase. Moving along the melody and the story. Strong C02 and c03 activity. 
+
+At the second drop, there is high c01 activity to be found. But it exists together with melodies.
+
+The pauses are short and rich in c02 and c03.
+
+The outro creates a transition to a piano play. Una mattina by Ludovico Enaudi, which, fun fact, is the sample Dr Peacock and Sefa used to create this track. It also gives you the opportunity to get down to earth and ask yourself 'what'd just happen?'
+
+This track has much less buildup than the first track. The drops are longer and appear more frequently. One of the imporant differences between hardstyle and hardcore is highlighted here. **Hardcore drops are much less subtle and have less buildup than hardcore drops in general.** Also **hardcore drop are longer in duration than hardstyle drops**.
+
+### Self simularity life is lost: Timbre
+```{r}
+life_is_lost %>%
+  compmus_self_similarity(timbre, "cosine") %>% 
+  ggplot(
+    aes(
+      x = xstart + xduration / 2,
+      width = xduration,
+      y = ystart + yduration / 2,
+      height = yduration,
+      fill = d
+    )
+  ) +
+  geom_tile() +
+  coord_fixed() +
+  scale_fill_viridis_c(guide = "none") +
+  theme_hard +
+  labs(x = "", y = "")
+```
+
+### Self similarity life is lost: pitch
+```{r}
+imaginary %>%
+  compmus_self_similarity(pitches, "cosine") %>% 
+  ggplot(
+    aes(
+      x = xstart + xduration / 2,
+      width = xduration,
+      y = ystart + yduration / 2,
+      height = yduration,
+      fill = d
+    )
+  ) +
+  geom_tile() +
+  coord_fixed() +
+  scale_fill_viridis_c(guide = "none") +
+  theme_hard +
+  labs(x = "", y = "")
+```
 
 Pink {data-navmenu='Harder styles catalogue'.pink}
 ============
 
-Column
+Column {.pinkcol}
 -------------
+![New Kids, the movie where most people born after the 90s learned about happy hardcore](https://media.s-bol.com/BBB9zyZg2EWX/550x538.jpg)
 
-### Happy Hardcore
+Happy hardcore is often associated with containing happy and uplifting tunes. 
 
-![Happy Harcore](https://i2.wp.com/www.indebanvan.nl/wp-content/uploads/2014/03/hardcore.png?fit=300%2C300&ssl=1)
-
-### Chordogram
-```{r}
-mellow <-
-  get_tidy_audio_analysis("75CLNW6Goi8LZ6rYGDmfHS") %>%
-  compmus_align(sections, segments) %>%
-  select(sections) %>%
-  unnest(sections) %>%
-  mutate(
-    pitches =
-      map(segments,
-        compmus_summarise, pitches,
-        method = "mean", norm = "manhattan"
-      )
-  )
-
-mellow %>% 
-  compmus_match_pitch_template(
-    key_templates,         # Change to chord_templates if descired
-    method = "euclidean",  # Try different distance metrics
-    norm = "manhattan"     # Try different norms
-  ) %>%
-  ggplot(
-    aes(x = start + duration / 2, width = duration, y = name, fill = d)
-  ) +
-  geom_tile() +
-  scale_fill_viridis_c(guide = "none") +
-  theme_minimal() +
-  labs(x = "Time (s)", y = "")
-```
-
->It is clearly visible that in happy hardcore, the major chords dominate. Happy hardcore is often associated with containing happy and uplifting tunes.
-
-Column
---------
-
-### Plot 2
-
-### Characteristics
+Noteworhty artists:
 Dune, 
 Mental Theo, 
 Party Animals, 
 Flamman & Abraxas
+
 tempo: 165-180 BPM
 melodious
 high valence
@@ -657,7 +926,8 @@ high acousticness
 
 'Happy Hardcore is major chord, piano-led, sample powered 90's rave.'
 
-### Plot 3
+Column {.pinkcol}
+--------
 
 (Ultra)Violet {data-navmenu='Harder styles catalogue'.violet}
 ====================================
@@ -665,17 +935,11 @@ high acousticness
 Column
 -------
 
-### Image
 Euphoric Hardstyle
 
-### Plot 1
 
 Column
 ------
-
-### Plot 2
-
-### Characteristics of Euphoric Hardstyle
 Melodious, Emotional
 
 This is considered the more approachable form of hardstyle. As opposed to raw hardstyle. This is a more melodic approach to hardstyle. The kick often moves in conjunction with the melody of the track making it very enjoyable to listen and dance to.
@@ -685,27 +949,16 @@ The sound first started in the early 2000s with influences from early hardcore a
 Some notable artists go under Headhunterz, Noisecontrollers, Wildstylez & Sub Zero Project.
 
 
-### Plot 3
-
-
 Blue {data-navmenu='Harder styles catalogue'.blue}
 ====================================
 
 Column
 -------
-
-### Image
 Raw hardstyle
 
-### Plot 1
 
 Column
 ------
-
-### Plot 2
-
-### Characteristics of Raw Hardstyle
-
 Aggressive, dark melodies
 
 In the early 2010s a demand for more harder kicks existed, rawstyle or raw-hardstyle was born. A more aggressive sound, darker melodies and harder bass. 
@@ -714,7 +967,6 @@ Rawstyle tracks have more drive to it, with shorter breaks. Rawstyle kicks tend 
 
 Some notable artists are: Radical Redemption, Warface, Rebellion, Gunz for Hire.
 
-### Plot 3
 
 Black {data-navmenu='Harder styles catalogue'.black}
 ====================================
@@ -722,17 +974,12 @@ Black {data-navmenu='Harder styles catalogue'.black}
 Column
 -------
 
-### Image
 Mainstream Hardcore
 
-### Plot 1
+
 
 Column
 ------
-
-### Plot 2
-
-### Characteristics of main hardcore
 
 Distorted kicks.
 
@@ -742,24 +989,17 @@ It started in the early 2000s as slower and more mature version of gabber.
 
 Artists worth mentioning are Angerfist, Miss K8, DJ Mad Dog
 
-### Plot 3
-
 Silver {data-navmenu='Harder styles catalogue'.silver}
 ====================================
 Column
 -------
 
-### Image
 Industrial hardcore
 
-### Plot 1
+
 
 Column
 ------
-
-### Plot 2
-
-### Characteristics of industrial hardcore
 
 Industrial, Consistent
 
@@ -767,40 +1007,32 @@ Industrial hardcore has many features of other genres. Mostly notable techno and
 
 Notable artists are The Outside Agency, Radium, N-Vitral.
 
-### Plot 3
-
 
 Yellow {data-navmenu='Harder styles catalogue'.yellow}
 ====================================
 Column
 -------
 
-### Image
 Uptempo
-
-### Plot 1
 
 Column
 ------
-
-### Plot 2
-
-### Characteristics of frenchcore
 
 Explosive, fast
 
 An umbrella term for again different genre's like frenchcore, terror and speedcore. But one thing that stands out from this style is the high tempo, energy and maddening chaos of the sound. Often very high and low pitch is found in each track and unexpected kickrolls are frequent. The explosive and fast nature make this style challenging to appreciate musically, but many tracks can actually be very melodious.
 
-This style started in the early 1990s and has been consistendly popular. Only in the latest few years the genres has been upcoming and popularised, very likely by the notable artists; Dr. Peacock, Sefa, Cyclone
+This style started in the early 1990s and has been consistendly (less) popular. Only in the latest few years the genres has been upcoming and popularised, very likely by the notable artists; Dr. Peacock, Sefa, Cyclone
 
-### Plot 3
-
-
-Concluding remarks
+Concluding remarks {.endpage}
 ===============================
 
-In this portfolio an attemp was done to justify/classify popular subgenres in harder styles music. I will discuss my findings in the chapter below along with supporting evidence and additional sources.
+Column {.white}
+--------
+In this portfolio an attempt was done to justify/classify popular subgenres in harder styles music. This music is considered to be EDM officially, stemming from influences of acid house in the late 80s. From then on out, there was constant evolution of the styles to where it stands today. 
 
+In this branche of music there are plenty of ways to classify the harder styles music. While it is an option to classify the harder styles in many different genres, some just consider hardstyle and hardcore as the two main streams. It's not even a bad estimation if one were to consider tempo alone. However it doesn't matter if you refer to it as gabber / hardstyle / hardcore / death to my ears. I hope you learned something reading this portfolio or at least discouvered something in this overlooked corner of EDM. I certainly did.
 
+I had fun putting together this portfolio and actually learned some usefull skills and facts, especially about music and data visualisation. Although I do feel that my final version has been very rushed, not even close to the version that I would have liked to hand in at the end of this course. This has mostly to do with my own work ethic and my fatal underestimation of the workload, not with the course, which I think was structured pretty well. I do expect this to influence my grade. I just think it needs to be said and that for the record I would not be surprised or annoyed if I need to redo the portfolio. Because I has a blast building it and doing it about my favorite music in the world.
 
 Thank you for reading
